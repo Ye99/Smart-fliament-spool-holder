@@ -8,11 +8,11 @@ module original_object_pattern_remover() {
 }
 
 module screw_hole() {
-    cylinder(r=screw_hole_diameter, h=35, center=true, $fn=50);
+    cylinder(d=screw_hole_diameter, h=35, center=true, $fn=50);
 }
 
 module enhance_slab() {
-    cube([8, 40, 6]);
+    cube([8, 40, 3]);
 }
 
 difference() {
@@ -22,7 +22,7 @@ difference() {
         
         original_object_pattern_remover();
         
-        translate([0, 51, 0])
+        translate([0, 48, 0])
             rotate([90, 0, 0])
                 enhance_slab();
     }
