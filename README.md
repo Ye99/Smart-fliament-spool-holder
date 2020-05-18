@@ -1,5 +1,5 @@
 # Smart-fliament-spool-holder
-Filament holder that provides filament tangle and run-out detection
+Filament holder that provides filament tangle and run-out detection, plus ball bearing spool guide. 
 
 1. 3D printed spool holder is the crossbred of [this smart spool holder](https://www.thingiverse.com/thing:3383638) and 
 [this ballbearing filament holder](https://www.thingiverse.com/thing:3020026). The smart spool holder doesn't provide CAD
