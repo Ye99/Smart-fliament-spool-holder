@@ -1,11 +1,11 @@
-// screw hole diameter in mm. no thread. 
-screw_hole_diameter=4.5;
+// screw hole diameter in mm. The hold is unthreaded.
+screw_hole_diameter=5.5;
 
 brace_wall_thickness=8;
 brace_wall_width=40;
-added_slab_length=7;
+added_slab_length=8;
 // distance from the screw hole, to contact edge between the added slab and original brace wall.
-screw_hole_to_contact_edge_distance=2.5;
+screw_hole_to_contact_edge_distance=3;
 
 module original_object_pattern_remover() {    
     translate([-26, 4, 0])
