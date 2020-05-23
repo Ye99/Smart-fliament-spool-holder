@@ -3,7 +3,8 @@ use <roundedCube.scad>
 // Relay secure poles for https://smile.amazon.com/gp/product/B07M88JRFY/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
 
 pole_height=10;
-pole_diameter=2;
+// hole diameter is 3. Leave some free-play.
+pole_diameter=2.5;
 pole_x_distance=20;
 pole_y_distance=45;
 

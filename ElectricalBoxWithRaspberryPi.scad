@@ -1,24 +1,13 @@
-/*
-*  Created by: Anhtien Nguyen
-*  Date:  June 11, 2018
-*  Description:  an electrical box with the dimension
-*/
-
 /* By: Ye Zhang (mr.yezhang@gmail.com)
-   Date: May 9, 2020
-    Added screw tab out of box; removed box bottom screw holes, which are blocked after outlet is installed; Removed two supporting cylinders; Refactored code to imporve maintainability etc. 
-   Date: May 10, 2020
-    Remove two holes from cover.
-    Enlarge screw holes.
-    Fine tune screw hole distance. 
-    Reduce box bottom tab thickness.
-    Moved screw holes on bottom tab further from box wall. Give more work space. 
+   Date: May 22, 2020
+    Raspberry Pi breakout holder and electrical box. 
 */
 
 use <roundedCube.scad>
+use <relay_secure_poles.scad>
 
 // Choose, which part you want to see!
-part = "all_parts__";  //[all_parts__:All Parts,bottom_part__:Bottom,top_part__:Top]
+part = "all_parts__";  //[all_parts__:All Parts,bottom_part__:Bottom,top_part__:Top, breakout_part__:Breakout]
 
 // Standard width is 69.33mm. This is inner space width.
 width=52; //[51:85]
@@ -32,12 +21,18 @@ wall_double_thickness=3.5; // [1:4]
 outlet_screw_hole_diag=3.4; // [3:6]
 // the screw hole on box bottom tab, to secure the box.
 bottom_tab_screw_hole_diag=5;
-// width of hole to run the input wires (mm)
+// width of hole to run the mains input wires (mm)
 // This 14/2 wire width is 10, height is 5
 wires_hole_width=11; // [8:12]
-// height of hole to run the input wires (mm)
+// height of hole to run the mains input wires (mm)
 wires_hole_height=6; // [4:12]
 // https://smile.amazon.com/gp/product/B000BPEQCC/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
+
+// this is relay control wire. Three wires.
+relay_control_wires_hole_diameter=8; // [8:12]
+
+// sensor wires to Raspberry Pi
+rpi_input_wires_hole_diameter=12; // [8:18]
 
 // radius for rounded corner
 rounded_corner_radius=2;
@@ -48,24 +43,111 @@ cover_alignment_tab_height=4;
 cover_alignment_tab_tolerance=0.2;
 
 // Program Section //
-if(part == "bottom_part__") {
+if (part == "bottom_part__") {
     box();
-} else if(part == "top_part__") {
+} else if (part == "top_part__") {
     cover();
-} else if(part == "all_parts__") {
+} else if (part == "breakout_part__") {
+      breakout();
+} else if (part == "all_parts__") {
     all_parts();
 } else {
     all_parts();
 }
 
+module breakout_walls(width, length, height) {
+    ow_width = width+wall_double_thickness;
+    ow_length = length+wall_double_thickness;
+    ow_height = height+wall_double_thickness/2;
+    
+    difference() {
+        // box walls
+        difference() {
+            // outside wall
+            roundedCube([ow_width, ow_length, ow_height], center=true, r=rounded_corner_radius,
+            zcorners=[true, false, false, true]);
+            // inside wall
+            translate([wall_double_thickness/2, wall_double_thickness/2, wall_double_thickness/2]) 
+                // make the inside wall wider/longer to cut two walls
+                roundedCube([width+wall_double_thickness, length+wall_double_thickness, height],
+                            center=true, r=rounded_corner_radius); 
+            
+            // control input wires hole on the side wall
+            translate([0, -ow_length/2, -ow_height/4])
+                rotate([90, 0, 0])
+                cylinder(d=rpi_input_wires_hole_diameter, h=wall_double_thickness, center=true, $fn=50);
+        } 
+    }
+}
+
+module rpi_box_brace_one_side(wall_thickness) {
+    hull() {
+            translate([rpi_box_holder_side_length, 0, 0]) 
+                circle(d=wall_thickness, $fn=50);
+            circle(d=wall_thickness, $fn=50);
+    }
+}
+
+module rpi_box_brace(wall_thickness) {
+    translate([0, 0, wall_thickness/2+rpi_box_holder_height/2])
+        rotate([0, 0, 90])
+            linear_extrude(height=rpi_box_holder_height, center=true, convexity = 10)    
+                union() {
+                    rpi_box_brace_one_side(wall_thickness);
+                    rotate([0, 0, 90])
+                        rpi_box_brace_one_side(wall_thickness);
+                }
+}
+
+/* Virtual rpi case to simulate rpi fit. */
+module mock_rpi_case() {
+    cube([rpi_box_x_with_tab, rpi_box_y, rpi_box_z]);
+}
+
+module rpi_box_holder(rpi_box_x, rpi_box_y, rpi_box_z) {
+    wall_thickness=wall_double_thickness/2;
+    
+    union() {
+        roundedCube([rpi_box_x+wall_thickness, rpi_box_y+wall_double_thickness, wall_thickness], 
+            center=true, r=wall_thickness/2,
+            zcorners=[false, true, true, false]);
+        
+        translate([(rpi_box_x)/2, -(rpi_box_y+wall_thickness)/2, 0]) 
+            rpi_box_brace(wall_thickness);
+        
+        translate([(rpi_box_x)/2, (rpi_box_y+wall_thickness)/2, 0]) 
+            rotate([0, 0, 90])
+                rpi_box_brace(wall_thickness);
+    }
+    
+    translate([-(rpi_box_x+wall_thickness)/2, -rpi_box_y/2, 0])
+        %mock_rpi_case();
+}
+
+module breakout() {
+    union() {
+        breakout_walls(width, length, height);
+        
+        translate([-(width+wall_double_thickness)/2-(rpi_box_x_with_tab+wall_double_thickness/2)/2, 
+                0, 
+                -(height)/2])
+            rotate([0, 0, 180])
+                rpi_box_holder(rpi_box_x_with_tab, rpi_box_y, rpi_box_z);
+    }
+}
+
 module all_parts() {
 translate([0, 0, (height+wall_double_thickness/2)/2]) 
-    box();
+    union() {
+        box();
+        translate([-width+wall_double_thickness/2, 0, 0])
+            breakout();
+    }
 
  // this put cover next to box
- // translate([width+(wall_double_thickness*2), 0, (wall_double_thickness/2+cover_wall_height)/2])
+ translate([width+(wall_double_thickness*2), 0, (wall_double_thickness/2+cover_wall_height)/2])
  // this displacement puts the cover on top
-  translate([0,0,(height+wall_double_thickness/2)+1]) rotate([0, 180, 0])
+ // translate([0,0,(height+wall_double_thickness/2)+1]) rotate([0, 180, 0])
     cover();
 }
 
@@ -89,6 +171,9 @@ rpi_box_y=67;
 rpi_box_x=27.5;
 rpi_box_x_with_tab=29 ;
 rpi_box_z=92;
+rpi_box_holder_height=40;
+// The holder is a triangle-shape bracket. This is one side's length.
+rpi_box_holder_side_length=5;
 
 module one_plug_hole() {
     difference(){
@@ -140,22 +225,27 @@ module cover(width=width, length=length, height=height, screw_pos=screw_posistio
     }
 }
 
-
 module box_walls(ow_width, ow_length, ow_height) {
         difference() {
             // box walls
             difference() {
                 // outside wall
-                roundedCube([ow_width, ow_length, ow_height],center=true, r=rounded_corner_radius);
+                roundedCube([ow_width, ow_length, ow_height], center=true, r=rounded_corner_radius,
+                zcorners=[false, true, true, false]);
                 // inside wall
                 translate([0, 0, wall_double_thickness/2]) 
                     roundedCube([width, length, height], center=true, r=rounded_corner_radius);
             } 
         
-           // input wires hole on side wall
+           // mains input wires hole on side wall
            translate([ow_width/2, -(ow_length/4), -ow_height/4])
                 // cube's x, y, z parameters confirm to the overall axes, making reasoning simple. 
                 cube([wall_double_thickness*2, wires_hole_width, wires_hole_height], center=true);
+            
+           // control input wires hole on the other side wall
+           translate([-ow_width/2, (ow_length/4), -ow_height/3])
+            rotate([0, 90, 0])
+                cylinder(d=relay_control_wires_hole_diameter, h=wall_double_thickness, center=true, $fn=50);
     }
 }
 
@@ -219,8 +309,10 @@ module box(width=width, length=length, height=height, screw_pos=screw_posistion_
     // support lengh-wide
     lengh_support(ow_width, ow_height, wall_double_thickness);
     
-    
     // the other support lengh-wide
     rotate([0,0,180]) 
         lengh_support(ow_width, ow_height, wall_double_thickness);
+    
+    translate([0, 0, -(height+wall_double_thickness/2)/2]) 
+        relay_secure_poles();
 }
