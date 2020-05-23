@@ -7,7 +7,7 @@ use <roundedCube.scad>
 use <relay_secure_poles.scad>
 
 // Choose, which part you want to see!
-part = "all_parts__";  //[all_parts__:All Parts,bottom_part__:Bottom,top_part__:Top, breakout_part__:Breakout]
+part = "all_parts__";  //[all_parts__:All Parts,electrical_box_bottom:ElectrialBoxBottom,electrical_box_cover:ElectricalBoxCover, breakout_bottom:BreakoutBottom, breakout_cover:BreakoutCover]
 
 // Standard width is 69.33mm. This is inner space width.
 width=52; //[51:85]
@@ -40,15 +40,26 @@ rounded_corner_radius=2;
 cover_alignment_tab_length=3;
 cover_alignment_tab_height=4;
 // the larger this value, the more cover free-play allowed.
-cover_alignment_tab_tolerance=0.2;
+cover_alignment_tab_tolerance=0.5;
 
-// Program Section //
-if (part == "bottom_part__") {
+
+breakout_cover_height=30;
+// leave space so cover and bottom will fit snuggly. 
+breakout_cover_free_play=0.5;
+
+// Program Section //workaround
+if (part == "electrical_box_bottom") {
     box();
-} else if (part == "top_part__") {
+} else if (part == "electrical_box_cover") {
     cover();
-} else if (part == "breakout_part__") {
-      breakout();
+} else if (part == "breakout_bottom") {
+    breakout();
+    %translate([0, 0, height-breakout_cover_height-wall_double_thickness-wall_double_thickness/2])
+        breakout_cover(width, length, breakout_cover_height);
+} else if (part == "breakout_cover") {
+    translate([0, 0, (breakout_cover_height+wall_double_thickness*3/2)/2])
+        rotate([180, 0, 90])
+            breakout_cover(width, length, breakout_cover_height);
 } else if (part == "all_parts__") {
     all_parts();
 } else {
@@ -56,7 +67,7 @@ if (part == "bottom_part__") {
 }
 
 module breakout_walls(width, length, height) {
-    ow_width = width+wall_double_thickness;
+    ow_width = width+wall_double_thickness; // two walls allocated
     ow_length = length+wall_double_thickness;
     ow_height = height+wall_double_thickness/2;
     
@@ -66,7 +77,9 @@ module breakout_walls(width, length, height) {
             // outside wall
             roundedCube([ow_width, ow_length, ow_height], center=true, r=rounded_corner_radius,
             zcorners=[true, false, false, true]);
-            // inside wall
+            // inside wall. 
+            // BUG: One wall width is added to inner width. Already printed buttom and don't want to reprint.
+            // add this width to cover as well so they fit. Search "bug work around" to locate it. 
             translate([wall_double_thickness/2, wall_double_thickness/2, wall_double_thickness/2]) 
                 // make the inside wall wider/longer to cut two walls
                 roundedCube([width+wall_double_thickness, length+wall_double_thickness, height],
@@ -136,6 +149,46 @@ module breakout() {
     }
 }
 
+module breakout_cover_cube(width, length, height, wall_thickness) {
+    roundedCube([width+wall_thickness*2 /*bug work around*/, length+wall_thickness*2, height+wall_thickness],
+                center=true, r=rounded_corner_radius,
+                zcorners=[false, true, true, false]);
+}
+
+// cover is L-shaped
+// width and length don't include buttom wall thickness
+module breakout_cover(width, length, height) {
+    wall_thickness=wall_double_thickness/2;
+    
+    translate([0, 0, wall_thickness])
+    rotate([0, 0, 180])
+        union() {
+            difference() {
+                breakout_cover_cube(width, length, height, wall_thickness);
+                translate([0, wall_thickness, -wall_thickness])
+                    breakout_cover_cube(width, length, height, wall_thickness);
+                
+                // cover remove vertical side edge. 
+                #translate([(width)/2-breakout_cover_free_play, 
+                            -length/2-wall_thickness, 
+                            -(height+wall_thickness)/2])
+                    cube([wall_thickness+breakout_cover_free_play, wall_thickness*3, height]);
+            }
+            
+            // inner tab
+            translate([-(width-wall_thickness)/2-wall_thickness, 
+                            length/2-wall_thickness-cover_alignment_tab_tolerance, 
+                            (height-wall_thickness)/2-cover_alignment_tab_height])
+                cube([width-rounded_corner_radius, wall_thickness, cover_alignment_tab_height]);
+            
+            // outer tab
+            translate([-(width-wall_thickness)/2-wall_thickness, 
+                    length/2+wall_thickness, 
+                    (height-wall_thickness)/2-cover_alignment_tab_height])
+                cube([width-rounded_corner_radius, wall_thickness, cover_alignment_tab_height+wall_thickness]);
+        }
+}
+
 module all_parts() {
 translate([0, 0, (height+wall_double_thickness/2)/2]) 
     union() {
@@ -149,6 +202,10 @@ translate([0, 0, (height+wall_double_thickness/2)/2])
  // this displacement puts the cover on top
  // translate([0,0,(height+wall_double_thickness/2)+1]) rotate([0, 180, 0])
     cover();
+    
+ translate([0, length/2+46, (breakout_cover_height+wall_double_thickness*3/2)/2])
+    rotate([180, 0, 90])
+        breakout_cover(width, length, breakout_cover_height);
 }
 
 // Inner space length.
@@ -176,7 +233,7 @@ rpi_box_holder_height=40;
 rpi_box_holder_side_length=5;
 
 module one_plug_hole() {
-    difference(){
+    difference() {
         cylinder(r=17.4625, h=15, center = true, $fn=50);
         translate([-24.2875,-15,-cover_wall_height*2]) cube([10,37,15], center=false);
         translate([14.2875,-15,-cover_wall_height*2]) cube([10,37,15], center=false);
