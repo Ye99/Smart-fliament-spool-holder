@@ -42,12 +42,17 @@ cover_alignment_tab_height=5;
 // tab is short, regular wall thickness isn't strong enough. 
 cover_alignment_tab_thickness=wall_double_thickness*2;
 // the larger this value, the more cover free-play allowed.
-cover_alignment_tab_tolerance=0.1;
+cover_alignment_tab_tolerance=0.2;
 
+// leave space for RPI 40pin dupoint cable.
+breakout_ribbon_cable_hole_height=15; // [15:35]
 
-breakout_cover_height=height; //30;
+breakout_cover_height=height-breakout_ribbon_cable_hole_height;
 // leave space so cover and bottom will fit snuggly. 
-breakout_cover_free_play=0.5;
+breakout_cover_free_play=0.3;
+
+// RPI 40pin ribbon cable width. Actual 59.
+breakout_ribbon_cable_width=60; // [59: 65]
 
 // Program Section //workaround
 if (part == "electrical_box_bottom") {
@@ -56,12 +61,12 @@ if (part == "electrical_box_bottom") {
     cover();
 } else if (part == "breakout_bottom") {
     breakout();
-    %translate([0, 0, height-breakout_cover_height])
-        breakout_cover(width, length, breakout_cover_height);
+    %translate([0, 0, (height-breakout_cover_height+wall_double_thickness/4)/2])
+        breakout_cover(breakout_ribbon_cable_width, length, breakout_cover_height);
 } else if (part == "breakout_cover") {
     translate([0, 0, (breakout_cover_height+wall_double_thickness*3/2)/2])
         rotate([180, 0, 90])
-            breakout_cover(width, length, breakout_cover_height);
+            breakout_cover(breakout_ribbon_cable_width, length, breakout_cover_height);
 } else if (part == "all_parts__") {
     all_parts();
 } else {
@@ -69,9 +74,9 @@ if (part == "electrical_box_bottom") {
 }
 
 module breakout_walls(width, length, height) {
-    ow_width = width+wall_double_thickness; // two walls allocated
-    ow_length = length+wall_double_thickness;
-    ow_height = height+wall_double_thickness/2;
+    ow_width = width+wall_double_thickness/2; // only one side has wall
+    ow_length = length+wall_double_thickness; // both sides have wall
+    ow_height = height+wall_double_thickness/2; // only bottom has wall
     
     difference() {
         // box walls
@@ -80,11 +85,9 @@ module breakout_walls(width, length, height) {
             roundedCube([ow_width, ow_length, ow_height], center=true, r=rounded_corner_radius,
             zcorners=[true, false, false, true]);
             // inside wall. 
-            // BUG: One wall width is added to inner width. Already printed buttom and don't want to reprint.
-            // add this width to cover as well so they fit. Search "bug work around" to locate it. 
             translate([wall_double_thickness/2, wall_double_thickness/2, wall_double_thickness/2]) 
                 // make the inside wall wider/longer to cut two walls
-                roundedCube([width+wall_double_thickness, length+wall_double_thickness, height],
+                roundedCube([width+wall_double_thickness/2, length+wall_double_thickness, height],
                             center=true, r=rounded_corner_radius); 
             
             // control input wires hole on the side wall
@@ -141,9 +144,9 @@ module rpi_box_holder(rpi_box_x, rpi_box_y, rpi_box_z) {
 
 module breakout() {
     union() {
-        breakout_walls(width, length, height);
+        breakout_walls(breakout_ribbon_cable_width, length, height);
         
-        translate([-(width+wall_double_thickness)/2-(rpi_box_x_with_tab+wall_double_thickness/2)/2, 
+        translate([-(breakout_ribbon_cable_width+wall_double_thickness/2)/2-(rpi_box_x_with_tab+wall_double_thickness/2)/2, 
                 0, 
                 -(height)/2])
             rotate([0, 0, 180])
@@ -152,7 +155,7 @@ module breakout() {
 }
 
 module breakout_cover_cube(width, length, height, wall_thickness) {
-    roundedCube([width+wall_thickness*2 /*bug work around*/, length+wall_thickness*2, height+wall_thickness],
+    roundedCube([width+wall_thickness, length+wall_thickness*2, height+wall_thickness],
                 center=true, r=rounded_corner_radius,
                 zcorners=[false, true, true, false]);
 }
@@ -170,8 +173,8 @@ module breakout_cover(width, length, height) {
                 translate([0, wall_thickness, -wall_thickness])
                     breakout_cover_cube(width, length, height, wall_thickness);
                 
-                // cover remove vertical side edge. 
-                #translate([(width)/2-breakout_cover_free_play, 
+                // remove cover vertical side edge. 
+                translate([(width-wall_thickness)/2-breakout_cover_free_play, 
                             -length/2-wall_thickness, 
                             -(height+wall_thickness)/2])
                     cube([wall_thickness+breakout_cover_free_play, wall_thickness*3, height]);
