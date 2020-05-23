@@ -38,12 +38,14 @@ rpi_input_wires_hole_diameter=12; // [8:18]
 rounded_corner_radius=2;
 
 cover_alignment_tab_length=3;
-cover_alignment_tab_height=4;
+cover_alignment_tab_height=5;
+// tab is short, regular wall thickness isn't strong enough. 
+cover_alignment_tab_thickness=wall_double_thickness*2;
 // the larger this value, the more cover free-play allowed.
-cover_alignment_tab_tolerance=0.5;
+cover_alignment_tab_tolerance=0.1;
 
 
-breakout_cover_height=30;
+breakout_cover_height=height; //30;
 // leave space so cover and bottom will fit snuggly. 
 breakout_cover_free_play=0.5;
 
@@ -54,7 +56,7 @@ if (part == "electrical_box_bottom") {
     cover();
 } else if (part == "breakout_bottom") {
     breakout();
-    %translate([0, 0, height-breakout_cover_height-wall_double_thickness-wall_double_thickness/2])
+    %translate([0, 0, height-breakout_cover_height])
         breakout_cover(width, length, breakout_cover_height);
 } else if (part == "breakout_cover") {
     translate([0, 0, (breakout_cover_height+wall_double_thickness*3/2)/2])
@@ -241,7 +243,7 @@ module one_plug_hole() {
 }
 
 module cover_alignment_tab() {
-    cube([wall_double_thickness/2, cover_alignment_tab_length, cover_alignment_tab_height], center=false);
+    cube([cover_alignment_tab_thickness, cover_alignment_tab_length, cover_alignment_tab_height], center=false);
 }
 
 module cover(width=width, length=length, height=height, screw_pos=screw_posistion_from_edge) {
@@ -277,7 +279,7 @@ module cover(width=width, length=length, height=height, screw_pos=screw_posistio
         
         translate([-width/2+cover_alignment_tab_tolerance, length/3, 0]) 
             cover_alignment_tab();
-        translate([-width/2+cover_alignment_tab_tolerance, -length/3, 0]) 
+        translate([width/2-cover_alignment_tab_tolerance-cover_alignment_tab_thickness, length/3, 0]) 
             cover_alignment_tab();
     }
 }

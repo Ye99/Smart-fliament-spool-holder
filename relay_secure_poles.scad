@@ -6,7 +6,7 @@ pole_height=10;
 // hole diameter is 3. Leave some free-play.
 pole_diameter=2.5;
 pole_x_distance=20;
-pole_y_distance=45;
+pole_y_distance=45.5;
 
 base_plate_thickness=1.2;
 rounded_corner_radius=2;
