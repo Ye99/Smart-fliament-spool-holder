@@ -5,6 +5,7 @@
 
 use <roundedCube.scad>
 use <relay_secure_poles.scad>
+use <triangles.scad>
 
 // Choose, which part you want to see!
 part = "all_parts__";  //[all_parts__:All Parts,electrical_box_bottom:ElectrialBoxBottom,electrical_box_cover:ElectricalBoxCover, breakout_bottom:BreakoutBottom, breakout_cover:BreakoutCover]
@@ -62,15 +63,20 @@ if (part == "electrical_box_bottom") {
 } else if (part == "breakout_bottom") {
     breakout();
     %translate([0, 0, (height-breakout_cover_height+wall_double_thickness/4)/2])
-        breakout_cover(breakout_ribbon_cable_width, length, breakout_cover_height);
+        breakout_cover_fixed_parameters();
 } else if (part == "breakout_cover") {
     translate([0, 0, (breakout_cover_height+wall_double_thickness*3/2)/2])
         rotate([180, 0, 90])
-            breakout_cover(breakout_ribbon_cable_width, length, breakout_cover_height);
+            breakout_cover_fixed_parameters();
 } else if (part == "all_parts__") {
     all_parts();
 } else {
     all_parts();
+}
+
+/* shared function to follow "DRY" principle */
+module breakout_cover_fixed_parameters() {
+    breakout_cover(breakout_ribbon_cable_width, length, breakout_cover_height);
 }
 
 module breakout_walls(width, length, height) {
@@ -147,11 +153,24 @@ module breakout() {
         breakout_walls(breakout_ribbon_cable_width, length, height);
         
         translate([-(breakout_ribbon_cable_width+wall_double_thickness/2)/2-(rpi_box_x_with_tab+wall_double_thickness/2)/2, 
-                0, 
-                -(height)/2])
+                    0, 
+                    -(height)/2])
             rotate([0, 0, 180])
                 rpi_box_holder(rpi_box_x_with_tab, rpi_box_y, rpi_box_z);
+        
+        breakout_cover_support(height);
     }
+}
+
+/* Breakout compartment only has one side wall. This module add a tab on the 
+shared wall to support cover. */
+module breakout_cover_support(height) {
+    wall_thickness=wall_double_thickness/2;
+    translate([(breakout_ribbon_cable_width+wall_thickness)/2, 
+                -length*3/10-cover_alignment_tab_tolerance, 
+                (height+wall_thickness)/2])
+        rotate([0, 90, 90])
+            a_triangle(30, 8, length*4/5);
 }
 
 module breakout_cover_cube(width, length, height, wall_thickness) {
@@ -182,8 +201,8 @@ module breakout_cover(width, length, height) {
             
             // inner tab
             translate([-(width-wall_thickness)/2-wall_thickness, 
-                            length/2-wall_thickness-cover_alignment_tab_tolerance, 
-                            (height-wall_thickness)/2-cover_alignment_tab_height])
+                        length/2-wall_thickness-cover_alignment_tab_tolerance, 
+                        (height-wall_thickness)/2-cover_alignment_tab_height])
                 cube([width-rounded_corner_radius, wall_thickness, cover_alignment_tab_height]);
             
             // outer tab
@@ -208,16 +227,18 @@ translate([0, 0, (height+wall_double_thickness/2)/2])
  // translate([0,0,(height+wall_double_thickness/2)+1]) rotate([0, 180, 0])
     cover();
     
- translate([0, length/2+46, (breakout_cover_height+wall_double_thickness*3/2)/2])
+ translate([0, (length+breakout_ribbon_cable_width)/2 + support_cylinder_radius*support_cylinder_scale_factor + 2, 
+           (breakout_cover_height+wall_double_thickness*3/2)/2])
     rotate([180, 0, 90])
-        breakout_cover(width, length, breakout_cover_height);
+        breakout_cover_fixed_parameters();
 }
 
 // Inner space length.
 length=106; // Note: if you change this, you must update screw_posistion_from_edge and the value at "why is this magic number?" accordingly.
 outlet_screw_hole_depth=35; // how far down is the outlet screw hole in supporting cylinder.
 support_cylinder_radius=outlet_screw_hole_diag*2+1;
-
+// Enlong the cylinder by this factor.
+support_cylinder_scale_factor=2.1;
 // distance between supporting cylinder and box top
 cylinder_top_gap=5.5-wall_double_thickness; // deduct cover thickness so the outlet will be flush.
 
@@ -317,7 +338,7 @@ module outlet_screw_cylinder(length, ow_height, screw_pos) {
     translate([0, -length/2, -ow_height/2])
         difference(){
                 // the support cylinder
-                scale([1, 2.1, 1]) 
+                scale([1, support_cylinder_scale_factor, 1]) 
                     cylinder(h=cylinder_height, 
                             r1=support_cylinder_radius, 
                             r2=support_cylinder_radius, $fn=60, center=false);
