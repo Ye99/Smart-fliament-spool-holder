@@ -42,7 +42,7 @@ cover_alignment_tab_height=5;
 // tab is short, regular wall thickness isn't strong enough. 
 cover_alignment_tab_thickness=wall_double_thickness*2;
 // the larger this value, the more cover free-play allowed.
-cover_alignment_tab_tolerance=0.2;
+cover_alignment_tab_tolerance=0.3;
 
 // leave space for RPI 40pin dupoint cable.
 breakout_ribbon_cable_hole_height=15; // [15:35]
@@ -198,7 +198,7 @@ module all_parts() {
 translate([0, 0, (height+wall_double_thickness/2)/2]) 
     union() {
         box();
-        translate([-width+wall_double_thickness/2, 0, 0])
+        translate([-breakout_ribbon_cable_width+wall_double_thickness/2, 0, 0])
             breakout();
     }
 
