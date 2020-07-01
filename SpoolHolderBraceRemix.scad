@@ -1,3 +1,8 @@
+include <BOSL/constants.scad>
+use <BOSL/metric_screws.scad>
+use <BOSL/transforms.scad>
+include <OpenSCAD-common-libraries/screw_matrics.scad>
+
 // screw hole diameter in mm. The hold is unthreaded.
 screw_hole_diameter=5.5;
 
@@ -35,6 +40,13 @@ module added_slab() {
     }
 }
 
+module lock_screw_hole() {
+    #screw(wood_screw_hole_tap_diameter, 
+       screwlen=wood_screw_stem_length,
+       headsize=wood_screw_head_diameter,
+       headlen=3, countersunk=false, align="base");
+}
+
 module brace() {
     difference() {
         union() {
@@ -46,7 +58,13 @@ module brace() {
         }
         
         remove_slab();
+        up(40)
+            right(2)
+                back(2.5)
+                    lock_screw_hole();
     }
 }
+
+
 
 brace();
