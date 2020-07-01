@@ -1,4 +1,4 @@
-use <roundedCube.scad>;
+use <OpenSCAD-common-libraries/roundedCube.scad>;
 use <SpoolHolderBraceRemix.scad>;
 
 // screw diameter in mm. including thread. 

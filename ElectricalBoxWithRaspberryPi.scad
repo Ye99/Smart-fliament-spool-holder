@@ -3,7 +3,7 @@
     Raspberry Pi breakout holder and electrical box. 
 */
 
-use <roundedCube.scad>
+use <OpenSCAD-common-libraries/roundedCube.scad>
 use <relay_secure_poles.scad>
 use <triangles.scad>
 

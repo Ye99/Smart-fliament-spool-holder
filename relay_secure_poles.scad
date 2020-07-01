@@ -1,4 +1,4 @@
-use <roundedCube.scad>
+use <OpenSCAD-common-libraries/roundedCube.scad>
 
 // Relay secure poles for https://smile.amazon.com/gp/product/B07M88JRFY/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
 
