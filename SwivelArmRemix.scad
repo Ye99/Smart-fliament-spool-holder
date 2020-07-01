@@ -1,5 +1,5 @@
 connector_thickness=4.8;
-reduce_thickness=0.8;
+reduce_thickness=0.5;
 connector_thickness_after_reduction=connector_thickness-reduce_thickness;
 
 module cut_cylinder() {
