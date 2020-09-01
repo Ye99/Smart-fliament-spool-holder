@@ -89,11 +89,6 @@ module breakout_walls(width, length, height) {
             translate([0, -ow_length/2, -ow_height/4])
                 rotate([90, 0, 0])
                 cylinder(d=rpi_input_wires_hole_diameter, h=wall_double_thickness, center=true, $fn=50);
-            
-            // control input wires hole on the wall of electrical box
-            // translate([0, -ow_length/2, -ow_height/4])
-                rotate([0, 90, 0])
-                #cylinder(d=relay_wires_hole_diameter, h=wall_double_thickness, center=true, $fn=50);
         } 
     }
 }
@@ -208,19 +203,26 @@ module breakout_cover(width, length, height) {
 }
 
 module all_parts() {
-    union() {
-        electricalbox_buttom(has_out_wire_hole=false);
-        translate([-breakout_ribbon_cable_width+wall_double_thickness/2, 0, (height+wall_double_thickness/2)/2])
-            breakout();
+    difference() {
+        union() {
+            electricalbox_buttom(has_out_wire_hole=false);
+            translate([-breakout_ribbon_cable_width+wall_double_thickness/2, 0, (height+wall_double_thickness/2)/2])
+                breakout();
+        }
+        
+        // Cut control input wires hole on the wall of electrical box
+        translate([-width/2, length/4, height/5.45])
+            rotate([0, 90, 0])
+                #cylinder(d=relay_wires_hole_diameter, h=wall_double_thickness, center=true, $fn=50);
     }
     
     // this put cover next to box
     right(width+(wall_double_thickness*1.7))
         electricalbox_cover();
     
- translate([0, (length+breakout_ribbon_cable_width)/2 + support_cylinder_radius*support_cylinder_scale_factor + 3, 
+    translate([0, (length+breakout_ribbon_cable_width)/2 + support_cylinder_radius*support_cylinder_scale_factor + 3, 
            (breakout_cover_height+wall_double_thickness*3/2)/2])
-    rotate([180, 0, 90])
-        breakout_cover_fixed_parameters();
+        rotate([180, 0, 90])
+            breakout_cover_fixed_parameters();
 }
 
