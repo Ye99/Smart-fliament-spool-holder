@@ -22,8 +22,11 @@ rpi_box_holder_height=40;
 // The holder is a triangle-shape bracket. This is one side's length.
 rpi_box_holder_side_length=5;
 
-// sensor wires to Raspberry Pi
+// Sensor wires to Raspberry Pi
 rpi_input_wires_hole_diameter=12; // [8:18]
+
+// Control wires to relay in the electric box
+relay_wires_hole_diameter=9; // [8:18]
 
 // radius for rounded corner
 rounded_corner_radius=2;
@@ -86,6 +89,11 @@ module breakout_walls(width, length, height) {
             translate([0, -ow_length/2, -ow_height/4])
                 rotate([90, 0, 0])
                 cylinder(d=rpi_input_wires_hole_diameter, h=wall_double_thickness, center=true, $fn=50);
+            
+            // control input wires hole on the wall of electrical box
+            // translate([0, -ow_length/2, -ow_height/4])
+                rotate([0, 90, 0])
+                #cylinder(d=relay_wires_hole_diameter, h=wall_double_thickness, center=true, $fn=50);
         } 
     }
 }
