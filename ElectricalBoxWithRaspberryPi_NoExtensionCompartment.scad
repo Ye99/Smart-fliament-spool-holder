@@ -17,7 +17,7 @@ rpi_box_y=61.6;
 rpi_box_x=27.5;
 rpi_box_x_with_tab=rpi_box_x;
 rpi_box_z=90.2;
-rpi_box_holder_height=40;
+rpi_box_holder_height=height;
 // The holder is a triangle-shape bracket. This is one side's length.
 rpi_box_holder_side_length=5;
 
