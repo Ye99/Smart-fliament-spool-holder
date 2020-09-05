@@ -18,12 +18,22 @@ hole_researved_area_z_length=z_length-(screw_to_end_distance*2+between_adjacent_
 hole_researved_area_y_protrude_thickness=8;
 hole_researved_area_x_protrude_thickness=8;
 
-module position_screw(surrounding_wall_thickness) {
-    up(screw_to_end_distance)
-        fwd(surrounding_wall_thickness)
-        right(x_length/2)
-            xrot(90)
-                children();
+module position_screw(surrounding_wall_thickness, is_on_down_side) {
+    if (is_on_down_side) {
+        up(screw_to_end_distance)
+            back(surrounding_wall_thickness+y_length)
+            right(x_length/2)
+                zrot(180)
+                    xrot(90)
+                        children();
+    }
+    else {
+        up(screw_to_end_distance)
+            fwd(surrounding_wall_thickness)
+            right(x_length/2)
+                xrot(90)
+                    children();
+    }
 }
 
 module duplicate_two_screws() {
@@ -33,7 +43,7 @@ module duplicate_two_screws() {
 }
 
 module hole_reserved_area() {
-    #cube([x_length+hole_researved_area_x_protrude_thickness, y_length+hole_researved_area_y_protrude_thickness, hole_researved_area_z_length]);
+    cube([x_length+hole_researved_area_x_protrude_thickness, y_length+hole_researved_area_y_protrude_thickness, hole_researved_area_z_length]);
 }
 
 // surrounding_wall_thickness determins how much screw protrude from block surface, leaving space for the wall. 
@@ -45,14 +55,17 @@ module load_cell(surrounding_wall_thickness) {
                 up(screw_to_end_distance*2+between_adjacent_screws_distance)
                     hole_reserved_area();
         
-        duplicate_two_screws()
-            position_screw(surrounding_wall_thickness)
-                #m4_screw();
+        // Move to the down side of the load cell.
+        // This end is inside spool holder guide.
+        
+            duplicate_two_screws()
+                position_screw(surrounding_wall_thickness, true)
+                    m4_screw();
         
         duplicate_two_screws()
             up(screw_group_distance)
-                position_screw(surrounding_wall_thickness)
-                    #m5_screw();
+                position_screw(surrounding_wall_thickness, false)
+                    m5_screw();
     }
     
 }
@@ -71,23 +84,4 @@ module m5_screw() {
                headlen=3, countersunk=false, align="base");
 }
 
-load_cell(surrounding_wall_thickness=3);
-
-/*
-module cut_locking_bolt_hole() {    
-    up(26)
-        right(2)
-            back(4.5)
-                #lock_screw_hole();
-}
-
-difference() {
-    translate([0, 61, 0])
-        import("Ball_bearing_spool_holder/3DPNFilHoldGuide.stl");
-        
-    cut_locking_bolt_hole();
-}
-
-down(7)
-    back(2)
-        %brace();*/
+load_cell(surrounding_wall_thickness=4);
