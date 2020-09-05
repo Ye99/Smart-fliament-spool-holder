@@ -14,14 +14,15 @@ use <BOSL/transforms.scad>
 part = "all_parts__";  //[all_parts__:All Parts,electrical_box_bottom:ElectrialBoxBottom,electrical_box_cover:ElectricalBoxCover, breakout_bottom:BreakoutBottom, breakout_cover:BreakoutCover]
 
 rpi_box_y=61.6;
-rpi_box_x=27.5;
+rpi_box_x=29;
 rpi_box_x_with_tab=rpi_box_x;
 rpi_box_z=90.2;
 rpi_box_holder_height=height;
 // The holder is a triangle-shape bracket. This is one side's length.
 rpi_box_holder_side_length=5;
 
-rpi_box_GPIO_side_support_z_length=19;
+rpi_box_GPIO_side_support_x_length=19;
+rpi_box_HDMI_side_support_z_length=5;
 
 // Control wires to relay in the electric box
 relay_wires_hole_diameter=9; // [8:18]
@@ -74,9 +75,14 @@ module rpi_box_holder(rpi_box_x, rpi_box_y, rpi_box_z) {
                 zcorners=[false, true, true, false]);
             
             up(wall_thickness/2)
+                left(rpi_box_x/2+wall_thickness/2)
+                    back((rpi_box_y)/2)
+                    cube([rpi_box_x, wall_thickness, rpi_box_HDMI_side_support_z_length], center=false);
+            
+            up(wall_thickness/2)
                 left(rpi_box_x/2+wall_thickness)
                     fwd((rpi_box_y)/2+wall_thickness)
-                    cube([rpi_box_GPIO_side_support_z_length, wall_thickness, height], center=false);
+                    cube([rpi_box_GPIO_side_support_x_length, wall_thickness, height], center=false);
             
             translate([(rpi_box_x)/2, (rpi_box_y+wall_thickness)/2, 0]) 
                 rotate([0, 0, 90])
