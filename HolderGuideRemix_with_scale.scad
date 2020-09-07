@@ -42,10 +42,3 @@ left(29.5)
     back(43.1)
         down(7)
             %brace();
-
-/*
-down(7)
-    back(2)
-        %brace(); */
-
-// 

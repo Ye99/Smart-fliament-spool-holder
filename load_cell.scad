@@ -71,16 +71,16 @@ module load_cell(surrounding_wall_thickness) {
 }
 
 module m4_screw() {
-        screw(number4_screw_hole_diameter, 
-               screwlen=number4_screw_stem_length,
-               headsize=number4_screw_head_diameter,
+        screw(M4_screw_hole_diameter,
+               screwlen=M4_screw_stem_length,
+               headsize=M4_screw_head_diameter,
                headlen=3, countersunk=false, align="base");
 }
 
 module m5_screw() {
-        screw(number5_screw_hole_diameter, 
-               screwlen=number5_screw_stem_length,
-               headsize=number5_screw_head_diameter,
+        screw(M5_screw_hole_diameter, 
+               screwlen=M5_screw_stem_length,
+               headsize=M5_screw_head_diameter,
                headlen=3, countersunk=false, align="base");
 }
 
